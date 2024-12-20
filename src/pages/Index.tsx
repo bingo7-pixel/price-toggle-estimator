@@ -9,12 +9,48 @@ import { PriceConfigComponent } from '@/components/menu/PriceConfig';
 import type { Ingredient, PriceConfig } from '@/types/menu';
 
 const initialIngredients: Ingredient[] = [
-  { name: 'Ground Beef', price: 5.99, category: 'Protein', priceUnit: 'pound' },
-  { name: 'Chicken Breast', price: 4.99, category: 'Protein', priceUnit: 'pound' },
-  { name: 'Mozzarella', price: 6.99, category: 'Cheese', priceUnit: 'pound' },
-  { name: 'Fresh Tomatoes', price: 2.99, category: 'Vegetables', priceUnit: 'pound' },
-  { name: 'Italian Sausage', price: 7.99, category: 'Protein', priceUnit: 'piece' },
-  { name: 'Bell Peppers', price: 3.99, category: 'Vegetables', priceUnit: 'piece' },
+  { 
+    name: 'Ground Beef', 
+    price: 5.99, 
+    category: 'Protein', 
+    priceUnit: 'pound',
+    nutrition: { calories: 250, protein: 26, carbs: 0, fat: 15 }
+  },
+  { 
+    name: 'Chicken Breast', 
+    price: 4.99, 
+    category: 'Protein', 
+    priceUnit: 'pound',
+    nutrition: { calories: 165, protein: 31, carbs: 0, fat: 3.6 }
+  },
+  { 
+    name: 'Mozzarella', 
+    price: 6.99, 
+    category: 'Cheese', 
+    priceUnit: 'pound',
+    nutrition: { calories: 280, protein: 22, carbs: 2, fat: 22 }
+  },
+  { 
+    name: 'Fresh Tomatoes', 
+    price: 2.99, 
+    category: 'Vegetables', 
+    priceUnit: 'pound',
+    nutrition: { calories: 22, protein: 1.1, carbs: 4.8, fat: 0.2 }
+  },
+  { 
+    name: 'Italian Sausage', 
+    price: 7.99, 
+    category: 'Protein', 
+    priceUnit: 'piece',
+    nutrition: { calories: 260, protein: 14, carbs: 1, fat: 22 }
+  },
+  { 
+    name: 'Bell Peppers', 
+    price: 3.99, 
+    category: 'Vegetables', 
+    priceUnit: 'piece',
+    nutrition: { calories: 30, protein: 1, carbs: 7, fat: 0.2 }
+  },
 ];
 
 const Index = () => {
@@ -51,6 +87,18 @@ const Index = () => {
       return (adjustedPrice * quantity).toFixed(2);
     }
     return (adjustedPrice * weight * quantity).toFixed(2);
+  };
+
+  const calculateTotalNutrition = () => {
+    return selectedIngredients.reduce((total, ingredient) => {
+      const multiplier = priceConfig.priceUnit === 'pound' ? priceConfig.weight : 1;
+      return {
+        calories: total.calories + ingredient.nutrition.calories * multiplier,
+        protein: total.protein + ingredient.nutrition.protein * multiplier,
+        carbs: total.carbs + ingredient.nutrition.carbs * multiplier,
+        fat: total.fat + ingredient.nutrition.fat * multiplier
+      };
+    }, { calories: 0, protein: 0, carbs: 0, fat: 0 });
   };
 
   return (
@@ -119,6 +167,7 @@ const Index = () => {
                 <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-primary to-primary/50 bg-clip-text text-transparent">
                   Item Summary
                 </h2>
+                
                 <div className="flex flex-wrap gap-2 mb-4">
                   <Badge variant="secondary" className="bg-secondary/50">
                     Ingredients
@@ -135,6 +184,21 @@ const Index = () => {
                       {ing.name}
                     </Badge>
                   ))}
+                </div>
+
+                <div className="mb-6 p-4 rounded-lg bg-secondary/20 border border-border/50">
+                  <h3 className="text-lg font-semibold mb-3 text-primary/90">Nutrition Information</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(calculateTotalNutrition()).map(([nutrient, value]) => (
+                      <div key={nutrient} className="flex justify-between items-center">
+                        <span className="capitalize text-muted-foreground">{nutrient}</span>
+                        <span className="font-semibold">
+                          {Math.round(value)}
+                          {nutrient === 'calories' ? ' kcal' : 'g'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 

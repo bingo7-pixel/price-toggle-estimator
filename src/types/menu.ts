@@ -3,6 +3,14 @@ export interface Ingredient {
   price: number;
   category: string;
   priceUnit: 'pound' | 'piece';
+  nutrition: NutritionInfo;
+}
+
+export interface NutritionInfo {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fat: number;
 }
 
 export interface PriceConfig {
