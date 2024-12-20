@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -26,19 +26,24 @@ export const IngredientSelector = ({
   onFilterChange,
 }: IngredientSelectorProps) => {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const resizeTimeoutRef = useRef<number>();
+
+  const handleResize = useCallback(() => {
+    if (resizeTimeoutRef.current) {
+      window.cancelAnimationFrame(resizeTimeoutRef.current);
+    }
+
+    resizeTimeoutRef.current = window.requestAnimationFrame(() => {
+      if (scrollAreaRef.current) {
+        // Update the height smoothly
+        scrollAreaRef.current.style.height = '300px';
+      }
+    });
+  }, []);
 
   useEffect(() => {
-    const resizeObserver = new ResizeObserver((entries) => {
-      // Debounce resize operations
-      requestAnimationFrame(() => {
-        entries.forEach(() => {
-          if (scrollAreaRef.current) {
-            // Force a reflow only when needed
-            scrollAreaRef.current.style.minHeight = '0px';
-            scrollAreaRef.current.style.minHeight = '';
-          }
-        });
-      });
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
     });
 
     if (scrollAreaRef.current) {
@@ -46,9 +51,12 @@ export const IngredientSelector = ({
     }
 
     return () => {
+      if (resizeTimeoutRef.current) {
+        window.cancelAnimationFrame(resizeTimeoutRef.current);
+      }
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [handleResize]);
 
   const filteredIngredients = ingredients.filter(ingredient => {
     const matchesFilter = filter === 'All' || ingredient.category === filter;
@@ -79,7 +87,7 @@ export const IngredientSelector = ({
         ))}
       </div>
 
-      <ScrollArea ref={scrollAreaRef} className="h-[300px] border rounded-lg p-4">
+      <ScrollArea ref={scrollAreaRef} className="border rounded-lg p-4">
         <div className="grid grid-cols-2 gap-4">
           {filteredIngredients.map((ingredient) => (
             <Button
