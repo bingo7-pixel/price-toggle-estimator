@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Ingredient } from '@/types/menu';
 
 interface IngredientSelectorProps {
@@ -26,6 +25,31 @@ export const IngredientSelector = ({
   filter,
   onFilterChange,
 }: IngredientSelectorProps) => {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver((entries) => {
+      // Debounce resize operations
+      requestAnimationFrame(() => {
+        entries.forEach(() => {
+          if (scrollAreaRef.current) {
+            // Force a reflow only when needed
+            scrollAreaRef.current.style.minHeight = '0px';
+            scrollAreaRef.current.style.minHeight = '';
+          }
+        });
+      });
+    });
+
+    if (scrollAreaRef.current) {
+      resizeObserver.observe(scrollAreaRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+
   const filteredIngredients = ingredients.filter(ingredient => {
     const matchesFilter = filter === 'All' || ingredient.category === filter;
     const matchesSearch = ingredient.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -55,7 +79,7 @@ export const IngredientSelector = ({
         ))}
       </div>
 
-      <ScrollArea className="h-[300px] border rounded-lg p-4">
+      <ScrollArea ref={scrollAreaRef} className="h-[300px] border rounded-lg p-4">
         <div className="grid grid-cols-2 gap-4">
           {filteredIngredients.map((ingredient) => (
             <Button
