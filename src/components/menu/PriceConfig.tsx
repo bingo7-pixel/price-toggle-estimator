@@ -11,6 +11,17 @@ interface PriceConfigProps {
 }
 
 export const PriceConfigComponent = ({ config, onConfigChange }: PriceConfigProps) => {
+  const handleBasePriceChange = (value: string) => {
+    const newBasePrice = parseFloat(value) || 0;
+    onConfigChange('basePrice', newBasePrice);
+    onConfigChange('adjustedPrice', newBasePrice); // Update adjusted price to match base price initially
+  };
+
+  const handleAdjustedPriceChange = (value: string) => {
+    const newAdjustedPrice = parseFloat(value) || 0;
+    onConfigChange('adjustedPrice', newAdjustedPrice);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -62,17 +73,38 @@ export const PriceConfigComponent = ({ config, onConfigChange }: PriceConfigProp
         </div>
       )}
 
-      <div>
-        <Label>Base Price (per {config.priceUnit})</Label>
-        <div className="flex items-center gap-4">
-          <span className="text-2xl font-semibold">${config.basePrice}</span>
+      <div className="space-y-4">
+        <div>
+          <Label>Base Price (per {config.priceUnit})</Label>
+          <Input
+            type="number"
+            value={config.basePrice}
+            onChange={(e) => handleBasePriceChange(e.target.value)}
+            step="0.01"
+            className="input-focus"
+            placeholder="Enter base price"
+          />
+        </div>
+
+        <div>
+          <Label>Adjusted Price (per {config.priceUnit})</Label>
           <Input
             type="number"
             value={config.adjustedPrice}
-            onChange={(e) => onConfigChange('adjustedPrice', Number(e.target.value))}
+            onChange={(e) => handleAdjustedPriceChange(e.target.value)}
+            step="0.01"
             className="input-focus"
             placeholder="Adjust price"
           />
+        </div>
+      </div>
+
+      <div className="pt-4 border-t">
+        <div className="flex justify-between items-center">
+          <span className="text-lg font-semibold">Total Price</span>
+          <span className="text-2xl font-bold">
+            ${(config.adjustedPrice * (config.priceUnit === 'pound' ? config.weight : 1) * config.quantity).toFixed(2)}
+          </span>
         </div>
       </div>
     </div>
