@@ -35,16 +35,13 @@ export const IngredientSelector = ({
 
     resizeTimeoutRef.current = window.requestAnimationFrame(() => {
       if (scrollAreaRef.current) {
-        // Update the height smoothly
         scrollAreaRef.current.style.height = '300px';
       }
     });
   }, []);
 
   useEffect(() => {
-    const resizeObserver = new ResizeObserver(() => {
-      handleResize();
-    });
+    const resizeObserver = new ResizeObserver(handleResize);
 
     if (scrollAreaRef.current) {
       resizeObserver.observe(scrollAreaRef.current);
@@ -66,7 +63,7 @@ export const IngredientSelector = ({
 
   return (
     <div className="space-y-6">
-      <Label>Select Ingredients</Label>
+      <Label className="text-primary/90">Select Ingredients</Label>
       <Input
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
@@ -80,24 +77,38 @@ export const IngredientSelector = ({
             key={cat}
             variant={filter === cat ? "default" : "outline"}
             onClick={() => onFilterChange(cat)}
-            className="button-inner"
+            className={`button-inner ${
+              filter === cat 
+                ? 'bg-primary/20 text-primary border-primary/30' 
+                : 'bg-secondary/50 hover:bg-secondary/80'
+            }`}
           >
             {cat}
           </Button>
         ))}
       </div>
 
-      <ScrollArea ref={scrollAreaRef} className="border rounded-lg p-4">
+      <ScrollArea 
+        ref={scrollAreaRef} 
+        className="border rounded-lg p-4 border-border/50 bg-secondary/20"
+      >
         <div className="grid grid-cols-2 gap-4">
           {filteredIngredients.map((ingredient) => (
             <Button
               key={ingredient.name}
               variant={selectedIngredients.includes(ingredient) ? "default" : "outline"}
               onClick={() => onIngredientSelect(ingredient)}
-              className="w-full justify-between button-inner"
+              className={`w-full justify-between button-inner ${
+                selectedIngredients.includes(ingredient)
+                  ? 'bg-primary/20 text-primary border-primary/30'
+                  : 'bg-secondary/50 hover:bg-secondary/80'
+              }`}
             >
               <span>{ingredient.name}</span>
-              <Badge variant="secondary">
+              <Badge 
+                variant="secondary"
+                className="bg-secondary/50 text-primary/90"
+              >
                 ${ingredient.price}/{ingredient.priceUnit}
               </Badge>
             </Button>
